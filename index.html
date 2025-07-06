@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rock Paper Scissors - Battle Zone 🎮</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at 20% 20%, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+      background-size: 800% 800%;
+      animation: colorfulFlow 15s ease infinite;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      color: #fff;
+      text-align: center;
+      position: relative;
+    }
+
+    @keyframes colorfulFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    h1 {
+      font-size: 3rem;
+      text-shadow: 2px 2px 10px #000;
+      z-index: 1;
+    }
+
+    .scoreboard {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.2rem;
+      background: rgba(0,0,0,0.4);
+      padding: 10px 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      z-index: 2;
+      display: flex;
+      gap: 15px;
+    }
+
+    .scoreboard div {
+      padding: 5px 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+
+    .buttons {
+      transition: opacity 0.3s ease;
+      margin-top: 20px;
+      z-index: 1;
+    }
+
+    .buttons button {
+      margin: 15px;
+      padding: 20px 30px;
+      font-size: 1.5rem;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease, background-color 0.3s ease;
+      background: orange;
+      color: #fff;
+    }
+
+    .buttons button:hover {
+      transform: scale(1.1);
+      background-color: green;
+    }
+
+    .result {
+      margin-top: 30px;
+      font-size: 2rem;
+      text-shadow: 1px 1px 5px #000;
+      z-index: 1;
+    }
+
+    .play-again {
+      margin-top: 30px;
+      display: none;
+      z-index: 1;
+    }
+
+    .play-again button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      margin: 10px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(to top right, #89f7fe, #66a6ff);
+      color: #000;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      transition: 0.3s;
+    }
+
+    .play-again button:hover {
+      background: linear-gradient(to top left, #66a6ff, #89f7fe);
+    }
+
+    .hand-animation {
+      font-size: 4rem;
+      display: inline-block;
+      animation: side-shake 0.5s infinite;
+      color: white;
+    }
+
+    @keyframes side-shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(10px); }
+      50% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+      100% { transform: translateX(0); }
+    }
+
+    .vs-text {
+      display: inline-block;
+      font-weight: bold;
+      font-size: 2rem;
+      margin: 0 15px;
+      color: white;
+      text-shadow: 2px 2px 5px #000;
+    }
+  </style>
+</head>
+<body>
+  <audio autoplay loop>
+    <source src="https://cdn.pixabay.com/audio/2023/03/01/audio_a2b1553f86.mp3" type="audio/mpeg">
+  </audio>
+
+  <h1>🎮 Rock Paper Scissors - Battle Zone</h1>
+  <div class="scoreboard" id="scoreboard">
+    <div id="winsBox">Wins: 0</div>
+    <div id="lossesBox">Losses: 0</div>
+    <div id="drawsBox">Draws: 0</div>
+  </div>
+
+  <div class="buttons" id="buttons">
+    <button onclick="play('rock')">✊ Rock</button>
+    <button onclick="play('paper')">✋ Paper</button>
+    <button onclick="play('scissors')">✌️ Scissors</button>
+  </div>
+
+  <div class="result">
+    <p id="hands"></p>
+    <p id="winner"></p>
+  </div>
+
+  <div class="play-again" id="play-again">
+    <p id="round-summary"></p>
+    <button onclick="startNewRound()">Yes! Let's go again 💪</button>
+    <button onclick="endGame()">Nah, I'm scared 😱</button>
+  </div>
+
+  <script>
+    const options = ['rock', 'paper', 'scissors'];
+    let maxRounds = 3;
+    let playCount = 0;
+    let winCount = 0;
+    let loseCount = 0;
+    let drawCount = 0;
+
+    const handIcons = {
+      rock: '✊',
+      paper: '✋',
+      scissors: '✌️'
+    };
+
+    function updateScoreboard() {
+      document.getElementById('winsBox').innerText = `Wins: ${winCount}`;
+      document.getElementById('lossesBox').innerText = `Losses: ${loseCount}`;
+      document.getElementById('drawsBox').innerText = `Draws: ${drawCount}`;
+    }
+
+    function play(userChoice) {
+      if (playCount >= maxRounds) return;
+
+      document.getElementById('buttons').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('buttons').style.display = 'none';
+      }, 300);
+
+      const computerChoice = options[Math.floor(Math.random() * options.length)];
+
+      document.getElementById('hands').innerHTML = `<span class="hand-animation">🤜🏼</span><span class="vs-text">VS</span><span class="hand-animation">🤛🏼</span>`;
+      document.getElementById('winner').innerText = '';
+
+      setTimeout(() => {
+        document.getElementById('hands').innerHTML = `<span>${handIcons[userChoice]}</span> <span class="vs-text" style="color: #ffe4e1;">VS</span> <span>${handIcons[computerChoice]}</span>`;
+
+        let result = '';
+        if (userChoice === computerChoice) {
+          result = "It's a tie! 🤝 Try harder!";
+          drawCount++;
+        } else if (
+          (userChoice === 'rock' && computerChoice === 'scissors') ||
+          (userChoice === 'paper' && computerChoice === 'rock') ||
+          (userChoice === 'scissors' && computerChoice === 'paper')
+        ) {
+          result = "🎉 You win this round! ✨";
+          winCount++;
+        } else {
+          result = "💀 You lost this one... Better luck next time!";
+          loseCount++;
+        }
+
+        updateScoreboard();
+        document.getElementById('winner').innerText = result;
+        playCount++;
+
+        if (playCount === maxRounds) {
+          let summary = '';
+          if (winCount > loseCount) {
+            summary = `🔥 You crushed it! Wanna go again?`;
+          } else if (loseCount > winCount) {
+            summary = `😏 You lost this time! Want a rematch?`;
+          } else {
+            summary = `🤷‍♂️ It's a draw. Let’s settle it next round!`;
+          }
+
+          document.getElementById('round-summary').innerText = summary;
+          document.getElementById('play-again').style.display = 'block';
+        } else {
+          setTimeout(() => {
+            document.getElementById('buttons').style.display = 'block';
+            document.getElementById('buttons').style.opacity = '1';
+          }, 1000);
+        }
+      }, 2000);
+    }
+
+    function startNewRound() {
+      playCount = 0;
+      winCount = 0;
+      loseCount = 0;
+      drawCount = 0;
+      updateScoreboard();
+      document.getElementById('hands').innerText = '';
+      document.getElementById('winner').innerText = '';
+      document.getElementById('round-summary').innerText = '';
+      document.getElementById('buttons').style.display = 'block';
+      document.getElementById('buttons').style.opacity = '1';
+      document.getElementById('play-again').style.display = 'none';
+    }
+
+    function endGame() {
+      document.body.innerHTML = "<h1>👋 Thanks for playing! Come back when you're ready to defeat me! 💥</h1>";
+    }
+
+    updateScoreboard();
+  </script>
+</body>
+</html>
