@@ -43,16 +43,11 @@ Choose wisely... 🧠🔥
 
 No libraries, No frameworks — just raw front-end power!
 
----
+----------------
 
-📸 Screenshots
+👩‍💻 Done By https://github.com/suga-25
 
-
----
-
-👩‍💻 Author
-
-Made with ❤️ by https://github.com/suga-25
+Crafted with creativity, colors, and code 🎨💻 
 
 ---
 
